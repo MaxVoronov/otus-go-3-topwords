@@ -38,8 +38,7 @@ func TestFindWord(t *testing.T) {
 
 func TestGetTopWords(t *testing.T) {
 	var maxCount uint = 10
-	chunks := chunk(TextSample)
-	topWords := GetTopWords(chunks, maxCount)
+	topWords := GetTopWords(TextSample, maxCount)
 
 	if wordsCount := len(topWords); uint(wordsCount) != maxCount {
 		t.Errorf("Not correct total words count: expect %d, got %d", maxCount, wordsCount)

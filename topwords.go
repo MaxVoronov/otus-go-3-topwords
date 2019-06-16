@@ -44,7 +44,8 @@ func (words WordList) findWord(word string) (int, bool) {
 }
 
 // Return list of most popular words limited by max count
-func GetTopWords(words []string, maxCount uint) WordList {
+func GetTopWords(text string, maxCount uint) WordList {
+	words := chunk(text)
 	result := make(WordList, 0, len(words))
 
 	for _, word := range words {
