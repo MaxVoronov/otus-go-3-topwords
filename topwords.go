@@ -2,63 +2,43 @@ package topwords
 
 import (
 	"regexp"
-	"sort"
 	"strings"
 )
 
-type Word struct {
-	Name  string
-	Count uint
-}
+// Sort map of words and return slice of words
+func sortMap(list map[string]int, revert bool) []string {
+	idxList := make([]int, 0, len(list))
+	wordList := make([]string, 0, len(list))
 
-type WordList []Word
+	for word, count := range list {
+		idxList = append(idxList, count)
+		wordList = append(wordList, word)
+	}
 
-// Return length of word list.
-// Used for implementation sort.Interface
-func (words WordList) Len() int {
-	return len(words)
-}
-
-// Compare two words by number of occurrences in the text.
-// Used for implementation sort.Interface
-func (words WordList) Less(i, j int) bool {
-	return words[i].Count < words[j].Count
-}
-
-// Swaps the elements with indexes.
-// Used for implementation sort.Interface
-func (words WordList) Swap(i, j int) {
-	words[i], words[j] = words[j], words[i]
-}
-
-// Try to find word in list.
-// Return index of word position in slice and does the word exist
-func (words WordList) findWord(word string) (int, bool) {
-	for idx, value := range words {
-		if value.Name == word {
-			return idx, true
+	for i := 0; i < len(wordList); i++ {
+		for j := i; j > 0; j-- {
+			if (!revert && idxList[j-1] > idxList[j]) || (revert && idxList[j-1] < idxList[j]) {
+				idxList[j-1], idxList[j] = idxList[j], idxList[j-1]
+				wordList[j-1], wordList[j] = wordList[j], wordList[j-1]
+			}
 		}
 	}
 
-	return -1, false
+	return wordList
 }
 
 // Return list of most popular words limited by max count
-func GetTopWords(text string, maxCount uint) WordList {
-	words := chunk(text)
-	result := make(WordList, 0, len(words))
-
-	for _, word := range words {
+func GetTopWords(text string, maxCount int) []string {
+	words := make(map[string]int)
+	for _, word := range chunk(text) {
 		word = strings.ToLower(word)
-
-		if idx, ok := result.findWord(word); ok {
-			result[idx].Count++
-		} else {
-			result = append(result, Word{word, 1})
-		}
+		words[word]++
 	}
 
-	sort.Sort(sort.Reverse(result))
+	result := sortMap(words, true)
+	if totalWords := len(result); totalWords < maxCount || maxCount < 0 {
+		maxCount = totalWords
+	}
 
 	return result[:maxCount]
 }
