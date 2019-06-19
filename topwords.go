@@ -2,27 +2,21 @@ package topwords
 
 import (
 	"regexp"
+	"sort"
 	"strings"
 )
 
 // Sort map of words and return slice of words
-func sortMap(list map[string]int, revert bool) []string {
-	idxList := make([]int, 0, len(list))
+func sortMap(list map[string]int) []string {
 	wordList := make([]string, 0, len(list))
 
-	for word, count := range list {
-		idxList = append(idxList, count)
+	for word := range list {
 		wordList = append(wordList, word)
 	}
 
-	for i := 0; i < len(wordList); i++ {
-		for j := i; j > 0; j-- {
-			if (!revert && idxList[j-1] > idxList[j]) || (revert && idxList[j-1] < idxList[j]) {
-				idxList[j-1], idxList[j] = idxList[j], idxList[j-1]
-				wordList[j-1], wordList[j] = wordList[j], wordList[j-1]
-			}
-		}
-	}
+	sort.Slice(wordList, func(i, j int) bool {
+		return list[wordList[i]] > list[wordList[j]]
+	})
 
 	return wordList
 }
@@ -35,7 +29,7 @@ func GetTopWords(text string, maxCount int) []string {
 		words[word]++
 	}
 
-	result := sortMap(words, true)
+	result := sortMap(words)
 	if totalWords := len(result); totalWords < maxCount || maxCount < 0 {
 		maxCount = totalWords
 	}
